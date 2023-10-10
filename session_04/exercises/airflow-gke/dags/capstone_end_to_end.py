@@ -6,7 +6,7 @@ Description: Ingests the data from a GCS bucket into a postgres table.
 """
 
 import os
-import urllib
+import gdown
 import requests
 from datetime import datetime as dt
 from pathlib import Path
@@ -38,34 +38,14 @@ GCS_PGS_KEY_NAME = "user_purchase.csv"
 POSTGRES_CONN_ID = "capstone_postgres"
 POSTGRES_TABLE_NAME = "user_purchase"
 
-file_urls = {
-    "user_purchase": "https://drive.google.com/file/d/1z4DfskDZSjqMZkhQCm9oMy42qwLpJSWt/view?usp=sharing",
-    "log_reviews": "https://drive.google.com/file/d/1jHoTVFb97e2H1ZmGPryr7JzqnYnGdr-g/view?usp=sharing",
-    "movie_reviews": "https://drive.google.com/file/d/1k7SpV4PyU9UpjSKiS2ji7Z3BqJKqyMGE/view?usp=sharing"
-}
+# file_urls = {
+#     "user_purchase": "https://drive.google.com/file/d/1z4DfskDZSjqMZkhQCm9oMy42qwLpJSWt/view?usp=sharing",
+#     "log_reviews": "https://drive.google.com/file/d/1jHoTVFb97e2H1ZmGPryr7JzqnYnGdr-g/view?usp=sharing",
+#     "movie_reviews": "https://drive.google.com/file/d/1k7SpV4PyU9UpjSKiS2ji7Z3BqJKqyMGE/view?usp=sharing"
+# }
 
-# def download_data(urls=file_urls, path=LOCAL_DATA_PATH) -> None:
-#     os.makedirs(os.path.dirname(path), exist_ok=True)
+file_urls = Variable.get("capstone_files_urls_public", deserialize_json=True)
 
-#     for key, url in urls.items():
-#         # Extract the file ID from the Google Drive URL
-#         file_id = url.split("/")[-2]
-        
-#         download_url = f"https://drive.google.com/uc?id={file_id}"
-#         local_file_name = f"{key}.csv"
-#         local_file_path = os.path.join(path, local_file_name)
-        
-#         # Download the file and save it locally
-#         urllib.request.urlretrieve(download_url, local_file_path)
-
-def download_large_file(file_url, local_file_path):
-    # Use the wget command to download the file
-    try:
-        subprocess.run(["wget", "-O", local_file_path, file_url], check=True)
-        print(f"Downloaded '{file_url}' and saved it as '{local_file_path}'")
-    except subprocess.CalledProcessError as e:
-        raise Exception(f"Failed to download '{file_url}': {e}")
-        
 def download_data(urls=file_urls, path=LOCAL_DATA_PATH) -> None:
     os.makedirs(os.path.dirname(path), exist_ok=True)
 
@@ -73,13 +53,13 @@ def download_data(urls=file_urls, path=LOCAL_DATA_PATH) -> None:
         # Extract the file ID from the Google Drive URL
         file_id = url.split("/")[-2]
         
-        # download_url = f"https://drive.google.com/uc?id={file_id}"
-        download_url = f"https://drive.google.com/uc?id={file_id}&export=download"
+        download_url = f"https://drive.google.com/uc?id={file_id}"
         local_file_name = f"{key}.csv"
         local_file_path = os.path.join(path, local_file_name)
         
-        # Download the file
-        download_large_file(download_url, local_file_path)
+        # Download the file and save it locally
+        gdown.download(download_url, local_file_path, quiet=False)
+        print(f"Downloaded {local_file_name} to {local_file_path}")
 
 
 def ingest_data_to_postgres(
