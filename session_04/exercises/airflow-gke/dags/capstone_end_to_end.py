@@ -6,9 +6,8 @@ Description: Ingests the data from a GCS bucket into a postgres table.
 """
 
 import os
-import logging
+import gdown
 import requests
-import tempfile
 from datetime import datetime as dt
 from pathlib import Path
 from airflow.models import DAG
@@ -40,21 +39,24 @@ POSTGRES_CONN_ID = "capstone_postgres"
 POSTGRES_TABLE_NAME = "user_purchase"
 
 file_urls = {
-    "user_purchase": "https://drive.google.com/file/d/1p8Q_QoCqdxnkKcpPLp15FDTFjSdTE_zk/view?usp=drive_web&authuser=0",
-    "log_reviews": "https://drive.google.com/file/d/1MfTRyyiMMGLuZ-hOysmjiATCUEHkQoE6/view?usp=drive_web&authuser=0",
-    "movie_reviews": "https://drive.google.com/file/d/1q-9kHMPHzyJhx-GpP93BqaLbW-pFRfGX/view?usp=drive_web&authuser=0"
+    "user_purchase": "https://drive.google.com/file/d/1z4DfskDZSjqMZkhQCm9oMy42qwLpJSWt/view?usp=sharing",
+    "log_reviews": "https://drive.google.com/file/d/1jHoTVFb97e2H1ZmGPryr7JzqnYnGdr-g/view?usp=sharing",
+    "movie_reviews": "https://drive.google.com/file/d/1k7SpV4PyU9UpjSKiS2ji7Z3BqJKqyMGE/view?usp=sharing"
 }
 
 def download_data(urls=file_urls, path=LOCAL_DATA_PATH) -> None:
     os.makedirs(os.path.dirname(path), exist_ok=True)
 
-    for f_name, url in urls.items():  
-        response = requests.request("GET", url)
-
-        file_path = f"{path}{f_name}.csv"
-
-        with open(file_path, "w") as local_file:
-            local_file.write(response.text)
+    for key, url in urls.items():
+        # Extract the file ID from the Google Drive URL
+        file_id = url.split("/")[-2]
+        
+        download_url = f"https://drive.google.com/uc?id={file_id}"
+        local_file_name = f"{key}.csv"
+        local_file_path = os.path.join(path, local_file_name)
+        
+        # Download the file and save it locally
+        gdown.download(download_url, local_file_path, quiet=False)
 
 
 
