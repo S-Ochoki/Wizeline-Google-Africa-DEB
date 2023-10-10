@@ -58,6 +58,14 @@ file_urls = {
 #         # Download the file and save it locally
 #         urllib.request.urlretrieve(download_url, local_file_path)
 
+def download_large_file(file_url, local_file_path):
+    # Use the wget command to download the file
+    try:
+        subprocess.run(["wget", "-O", local_file_path, file_url], check=True)
+        print(f"Downloaded '{file_url}' and saved it as '{local_file_path}'")
+    except subprocess.CalledProcessError as e:
+        raise Exception(f"Failed to download '{file_url}': {e}")
+        
 def download_data(urls=file_urls, path=LOCAL_DATA_PATH) -> None:
     os.makedirs(os.path.dirname(path), exist_ok=True)
 
@@ -66,20 +74,12 @@ def download_data(urls=file_urls, path=LOCAL_DATA_PATH) -> None:
         file_id = url.split("/")[-2]
         
         # download_url = f"https://drive.google.com/uc?id={file_id}"
-        download_url = f"https://drive.google.com/uc?export=download&id={file_id}"
+        download_url = f"https://drive.google.com/uc?id={file_id}&export=download"
         local_file_name = f"{key}.csv"
         local_file_path = os.path.join(path, local_file_name)
         
-        # Download the file using requests
-        response = requests.get(download_url)
-        
-        if response.status_code == 200:
-            with open(local_file_path, 'wb') as file:
-                file.write(response.content)
-            print(f"Downloaded '{local_file_name}' and saved it as '{local_file_path}'")
-        else:
-            raise Exception(f"Failed to download '{local_file_name}'")
-
+        # Download the file
+        download_large_file(download_url, local_file_path)
 
 
 def ingest_data_to_postgres(
