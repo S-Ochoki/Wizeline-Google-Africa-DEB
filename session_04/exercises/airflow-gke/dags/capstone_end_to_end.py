@@ -65,7 +65,8 @@ def download_data(urls=file_urls, path=LOCAL_DATA_PATH) -> None:
         # Extract the file ID from the Google Drive URL
         file_id = url.split("/")[-2]
         
-        download_url = f"https://drive.google.com/uc?id={file_id}"
+        # download_url = f"https://drive.google.com/uc?id={file_id}"
+        download_url = f"https://drive.google.com/uc?export=download&id={file_id}"
         local_file_name = f"{key}.csv"
         local_file_path = os.path.join(path, local_file_name)
         
