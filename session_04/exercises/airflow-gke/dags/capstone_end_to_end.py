@@ -6,7 +6,7 @@ Description: Ingests the data from a GCS bucket into a postgres table.
 """
 
 import os
-import gdown
+import urllib
 import requests
 from datetime import datetime as dt
 from pathlib import Path
@@ -56,7 +56,7 @@ def download_data(urls=file_urls, path=LOCAL_DATA_PATH) -> None:
         local_file_path = os.path.join(path, local_file_name)
         
         # Download the file and save it locally
-        gdown.download(download_url, local_file_path, quiet=False)
+        urllib.request.urlretrieve(url, local_file_path)
 
 
 
