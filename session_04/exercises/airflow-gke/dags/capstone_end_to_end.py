@@ -107,16 +107,16 @@ with DAG(
         task_id="upload_movie_reviews_to_gcs",
         src=f"{LOCAL_DATA_PATH}movie_reviews.csv",  
         dst=f"{GCS_BUCKET_NAME}movie_reviews.csv", 
-        bucket_name=GCS_BUCKET_NAME,
-        google_cloud_storage_conn_id=GCP_CONN_ID, 
+        bucket=GCS_BUCKET_NAME,
+        gcp_conn_id=GCP_CONN_ID, 
     )
 
     upload_log_reviews_to_gcs = LocalFilesystemToGCSOperator(
         task_id="upload_log_reviews_to_gcs",
         src=f"{LOCAL_DATA_PATH}log_reviews.csv",  
         dst=f"{GCS_BUCKET_NAME}log_reviews.csv", 
-        bucket_name=GCS_BUCKET_NAME,
-        google_cloud_storage_conn_id=GCP_CONN_ID, 
+        bucket=GCS_BUCKET_NAME,
+        gcp_conn_id=GCP_CONN_ID, 
     )
 
 
