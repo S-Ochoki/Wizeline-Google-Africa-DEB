@@ -44,6 +44,20 @@ file_urls = {
     "movie_reviews": "https://drive.google.com/file/d/1k7SpV4PyU9UpjSKiS2ji7Z3BqJKqyMGE/view?usp=sharing"
 }
 
+# def download_data(urls=file_urls, path=LOCAL_DATA_PATH) -> None:
+#     os.makedirs(os.path.dirname(path), exist_ok=True)
+
+#     for key, url in urls.items():
+#         # Extract the file ID from the Google Drive URL
+#         file_id = url.split("/")[-2]
+        
+#         download_url = f"https://drive.google.com/uc?id={file_id}"
+#         local_file_name = f"{key}.csv"
+#         local_file_path = os.path.join(path, local_file_name)
+        
+#         # Download the file and save it locally
+#         urllib.request.urlretrieve(download_url, local_file_path)
+
 def download_data(urls=file_urls, path=LOCAL_DATA_PATH) -> None:
     os.makedirs(os.path.dirname(path), exist_ok=True)
 
@@ -55,8 +69,15 @@ def download_data(urls=file_urls, path=LOCAL_DATA_PATH) -> None:
         local_file_name = f"{key}.csv"
         local_file_path = os.path.join(path, local_file_name)
         
-        # Download the file and save it locally
-        urllib.request.urlretrieve(download_url, local_file_path)
+        # Download the file using requests
+        response = requests.get(download_url)
+        
+        if response.status_code == 200:
+            with open(local_file_path, 'wb') as file:
+                file.write(response.content)
+            print(f"Downloaded '{local_file_name}' and saved it as '{local_file_path}'")
+        else:
+            raise Exception(f"Failed to download '{local_file_name}'")
 
 
 
