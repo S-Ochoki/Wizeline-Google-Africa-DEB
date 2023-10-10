@@ -56,7 +56,7 @@ def download_data(urls=file_urls, path=LOCAL_DATA_PATH) -> None:
         local_file_path = os.path.join(path, local_file_name)
         
         # Download the file and save it locally
-        urllib.request.urlretrieve(url, local_file_path)
+        urllib.request.urlretrieve(download_url, local_file_path)
 
 
 
