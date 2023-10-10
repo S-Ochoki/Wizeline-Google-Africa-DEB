@@ -163,8 +163,8 @@ with DAG(
         python_callable=ingest_data_to_postgres,
         op_kwargs={
             "postgres_conn_id": POSTGRES_CONN_ID,
-            "path": GCS_BUCKET_NAME,
-            "file": GCS_PGS_KEY_NAME,
+            "path": LOCAL_DATA_PATH,
+            "file": "user_purchase",
             "postgres_table": POSTGRES_TABLE_NAME,
         },
         trigger_rule=TriggerRule.ONE_SUCCESS,
