@@ -48,7 +48,7 @@ file_urls = {
 def download_data(urls=file_urls, path=LOCAL_DATA_PATH) -> None:
     os.makedirs(os.path.dirname(path), exist_ok=True)
 
-    for f_name, url in urls:  
+    for f_name, url in urls.items():  
         response = requests.request("GET", url)
 
         file_path = f"{path}{f_name}.csv"
