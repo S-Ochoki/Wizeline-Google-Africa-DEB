@@ -37,7 +37,7 @@ GCS_PGS_KEY_NAME = "user_purchase.csv"
 
 # Postgres constants
 POSTGRES_CONN_ID = "capstone_postgres"
-POSTGRES_TABLE_NAME = "capstone.user_purchase"
+POSTGRES_TABLE_NAME = "user_purchase"
 
 file_urls = {
     "user_purchase": "https://drive.google.com/file/d/1p8Q_QoCqdxnkKcpPLp15FDTFjSdTE_zk/view?usp=drive_web&authuser=0",
