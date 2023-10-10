@@ -10,7 +10,7 @@ import gdown
 import requests
 from datetime import datetime as dt
 from pathlib import Path
-from airflow.models import DAG
+from airflow.models import DAG, Variable
 from airflow.operators.dummy import DummyOperator
 from airflow.operators.python import PythonOperator
 from airflow.operators.sql import BranchSQLOperator
