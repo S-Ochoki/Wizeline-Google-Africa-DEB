@@ -189,14 +189,12 @@ with DAG(
     (
         start_workflow
         >> get_data
-        >> [
-            upload_log_reviews_to_gcs >> check_log_file_sensor, 
-            upload_movie_reviews_to_gcs >> check_movie_file_sensor ,                
-            create_user_purchase_table >> validate_data >> [clear_table, continue_process] >> ingest_data                 
-           ]  
-        >> end_workflow
+        >> [ upload_log_reviews_to_gcs, upload_movie_reviews_to_gcs, create_user_purchase_table ] 
     )
-    
+    upload_log_reviews_to_gcs >> check_log_file_sensor
+    upload_movie_reviews_to_gcs >> check_movie_file_sensor
+    create_user_purchase_table >> validate_data >> [clear_table, continue_process] >> ingest_data
+    [check_log_file_sensor, check_movie_file_sensor, ingest_data] >> end_workflow    
     
 
     dag.doc_md = __doc__
