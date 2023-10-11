@@ -150,14 +150,16 @@ with DAG(
         task_id="movie_pyspark_task", 
         job=MOVIE_PYSPARK_JOB, 
         region=REGION, 
-        project_id=PROJECT_ID
+        project_id=PROJECT_ID,
+        gcp_conn_id=GCP_CONN_ID
     )
 
     log_pyspark_task = DataprocSubmitJobOperator(
         task_id="log_pyspark_task", 
         job=LOG_PYSPARK_JOB, 
         region=REGION, 
-        project_id=PROJECT_ID
+        project_id=PROJECT_ID,
+        gcp_conn_id=GCP_CONN_ID
     )
 
     delete_cluster = DataprocDeleteClusterOperator(
