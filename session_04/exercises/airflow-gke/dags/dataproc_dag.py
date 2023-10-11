@@ -17,7 +17,7 @@ from airflow.utils.dates import days_ago
 
 # General constants
 DAG_ID = "dataproc_raw_to_stage"
-LOCAL_DATA_PATH = "/usr/local/airflow/pyspark/files/"
+LOCAL_DATA_PATH = "/usr/local/airflow/dags/files/pyspark/"
 
 # GCP constants
 GCP_CONN_ID = "gcp_default"
