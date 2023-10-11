@@ -32,7 +32,7 @@ PROJECT_ID = "wizeline-deb-capstone"
 CLUSTER_NAME = "wizeline-deb-dataproc"
 MOVIE_PYSPARK_FILE_URI = "gs://wizeline_bootcamp_bucket/SPARK_JOB/movie_review_positive_sentiment.py"
 LOG_PYSPARK_FILE_URI = "gs://wizeline_bootcamp_bucket/SPARK_JOB/log_review_processing.py"
-REGION = "us-east1"
+REGION = "me-central1"
 # ZONE = "us-central1-b"
 
 
