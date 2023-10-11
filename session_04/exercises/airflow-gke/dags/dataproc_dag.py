@@ -164,7 +164,8 @@ with DAG(
         task_id="delete_cluster",
         project_id=PROJECT_ID,
         cluster_name=CLUSTER_NAME,
-        region=REGION,        
+        region=REGION,
+        gcp_conn_id=GCP_CONN_ID,      
         trigger_rule=TriggerRule.ALL_DONE,
     )
 
