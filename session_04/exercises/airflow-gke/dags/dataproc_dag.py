@@ -65,7 +65,7 @@ CLUSTER_CONFIG = {
 MOVIE_PYSPARK_JOB = {
     "reference": {"project_id": PROJECT_ID},
     "placement": {"cluster_name": CLUSTER_NAME},
-    "job": {
+    "pysparkJob": {
         "main_python_file_uri": MOVIE_PYSPARK_FILE_URI,
         "python_file_uris": [MOVIE_PYSPARK_FILE_URI],
         },
@@ -74,7 +74,7 @@ MOVIE_PYSPARK_JOB = {
 LOG_PYSPARK_JOB = {
     "reference": {"project_id": PROJECT_ID},
     "placement": {"cluster_name": CLUSTER_NAME},
-    "job": {
+    "pysparkJob": {
         "main_python_file_uri": LOG_PYSPARK_FILE_URI,
         "python_file_uris": [LOG_PYSPARK_FILE_URI],
         },
