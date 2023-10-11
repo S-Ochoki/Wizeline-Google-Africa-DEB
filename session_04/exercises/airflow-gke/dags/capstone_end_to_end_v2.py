@@ -42,12 +42,6 @@ GCS_MOVIE_FILE_PATH = 'RAW/movie_reviews.csv'
 POSTGRES_CONN_ID = "capstone_postgres"
 POSTGRES_TABLE_NAME = "user_purchase"
 
-# file_urls = {
-#     "user_purchase": "https://drive.google.com/file/d/1z4DfskDZSjqMZkhQCm9oMy42qwLpJSWt/view?usp=sharing",
-#     "log_reviews": "https://drive.google.com/file/d/1jHoTVFb97e2H1ZmGPryr7JzqnYnGdr-g/view?usp=sharing",
-#     "movie_reviews": "https://drive.google.com/file/d/1k7SpV4PyU9UpjSKiS2ji7Z3BqJKqyMGE/view?usp=sharing"
-# }
-
 file_urls = Variable.get("capstone_files_urls_public", deserialize_json=True)
 
 def download_data(urls=file_urls, path=LOCAL_DATA_PATH) -> None:
@@ -127,14 +121,6 @@ with DAG(
         gcp_conn_id=GCP_CONN_ID, 
     )
 
-
-    # verify_key_existence = GCSObjectExistenceSensor(
-    #     task_id="verify_key_existence",
-    #     google_cloud_conn_id=GCP_CONN_ID,
-    #     bucket=GCS_BUCKET_NAME,
-    #     object=GCS_PGS_KEY_NAME,
-    # )
-
     create_user_purchase_table = PostgresOperator(
         task_id="create_user_purchase_table",
         postgres_conn_id=POSTGRES_CONN_ID,
@@ -180,20 +166,22 @@ with DAG(
 
     check_log_file_sensor = GoogleCloudStorageObjectSensor(
         task_id='check_log_file',
-        bucket_name=GCS_BUCKET_NAME,
-        object_name=GCS_LOG_FILE_PATH,
+        google_cloud_conn_id=GCP_CONN_ID,
+        bucket=GCS_BUCKET_NAME,
+        object=GCS_LOG_FILE_PATH,
         mode='poke',  # Use 'poke' mode to continuously check until the file exists
         timeout=60 * 2.5,  # Timeout in seconds (adjust as needed)
-        poke_interval=60,  # Polling interval in seconds (adjust as needed)
+        poke_interval=30,  # Polling interval in seconds (adjust as needed)
     )
 
     check_movie_file_sensor = GoogleCloudStorageObjectSensor(
         task_id='check_movie_file',
-        bucket_name=GCS_BUCKET_NAME,
-        object_name=GCS_MOVIE_FILE_PATH,
+        bucket=GCS_BUCKET_NAME,
+        object=GCS_MOVIE_FILE_PATH,
+        google_cloud_conn_id=GCP_CONN_ID,
         mode='poke',  # Use 'poke' mode to continuously check until the file exists
         timeout=60 * 2.5,  # Timeout in seconds (adjust as needed)
-        poke_interval=60,  # Polling interval in seconds (adjust as needed)
+        poke_interval=30,  # Polling interval in seconds (adjust as needed)
     )
 
     end_workflow = DummyOperator(task_id="end_workflow")
