@@ -78,7 +78,7 @@ MOVIE_PYSPARK_JOB = {
     "placement": {
         "cluster_name": CLUSTER_NAME
     },
-    "pysparkJob": {
+    "pyspark_job": {
         "mainPythonFileUri": MOVIE_PYSPARK_FILE_URI
     }
 }
