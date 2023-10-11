@@ -188,9 +188,9 @@ with DAG(
     (
         start_workflow
         >> get_files
-        # >> create_cluster
+        >> create_cluster
         >> [ movie_pyspark_task, log_pyspark_task ]  
-        # >> delete_cluster
+        >> delete_cluster
         >> end_workflow
     )
 
