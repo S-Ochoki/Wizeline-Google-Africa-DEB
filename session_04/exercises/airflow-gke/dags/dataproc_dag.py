@@ -79,14 +79,14 @@ MOVIE_PYSPARK_JOB = {
         "cluster_name": CLUSTER_NAME
     },
     "pyspark_job": {
-        "mainPythonFileUri": MOVIE_PYSPARK_FILE_URI
+        "main_python_file_uri": MOVIE_PYSPARK_FILE_URI
     }
 }
 
 LOG_PYSPARK_JOB = {
     "reference": {"project_id": PROJECT_ID},
     "placement": {"cluster_name": CLUSTER_NAME},
-    "pysparkJob": {
+    "pyspark_job": {
         "main_python_file_uri": LOG_PYSPARK_FILE_URI,
         "python_file_uris": [LOG_PYSPARK_FILE_URI],
         },
