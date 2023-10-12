@@ -167,6 +167,8 @@ with DAG(
         gcp_conn_id=GCP_CONN_ID, 
     )
 
+    checks_start = DummyOperator(task_id="checks_start")
+
     check_gcs_uri_task = HttpSensor(
         task_id="check_gcs_uri_task",
         http_conn_id="http_gcs_default",  # Use an HTTP connection ID defined in Airflow
@@ -218,7 +220,13 @@ with DAG(
 
     end_workflow = DummyOperator(task_id="end_workflow")
 
-    start_workflow >> [upload_movie_pyspark_to_gcs, upload_log_pyspark_to_gcs] >> [check_gcs_uri_task, check_gdrive_uri_task] >> end_workflow
+    (
+        start_workflow
+        # >> get_files
+        >> [upload_movie_pyspark_to_gcs, upload_log_pyspark_to_gcs]
+        >> checks_start
+    )
+    checks_start >> [check_gcs_uri_task, check_gdrive_uri_task] >> end_workflow
     # (
     #     start_workflow
     #     # >> get_files
