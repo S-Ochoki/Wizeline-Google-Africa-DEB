@@ -162,7 +162,7 @@ with DAG(
         task_id='extract_user_purchase_data_postgres',
         postgres_conn_id=POSTGRES_CONN_ID, 
         sql=f'SELECT * FROM {POSTGRES_TABLE_NAME}', 
-        bucket_name=GCS_BUCKET_NAME,  
+        bucket=GCS_BUCKET_NAME,  
         filename='user_purchase.csv', 
         export_format='CSV',
     )
