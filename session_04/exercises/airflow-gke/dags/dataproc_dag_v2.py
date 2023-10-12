@@ -178,7 +178,7 @@ with DAG(
     check_gdrive_uri_task = HttpSensor(
         task_id="check_gdrive_uri_task",
         http_conn_id="http_gdrive_default",  # Use an HTTP connection ID defined in Airflow
-        endpoint=pyspark_file_urls['log_reviews']
+        endpoint=pyspark_file_urls['log_review_processing']
     )
 
 
