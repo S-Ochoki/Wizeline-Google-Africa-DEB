@@ -10,11 +10,10 @@ from airflow.operators.dummy import DummyOperator
 from airflow.operators.python import PythonOperator
 from airflow.providers.http.sensors.http import HttpSensor
 from airflow.providers.google.cloud.transfers.local_to_gcs import LocalFilesystemToGCSOperator
+from airflow.providers.postgres.transfers.postgres_to_gcs import PostgresToGoogleCloudStorageOperator
 from airflow.providers.google.cloud.operators.dataproc import DataprocCreateClusterOperator, DataprocSubmitJobOperator, DataprocDeleteClusterOperator
 from airflow.utils.trigger_rule import TriggerRule
 from airflow.utils.dates import days_ago
-# from airflow.providers.google.cloud.transfers.dataproc_to_gcs import DataprocJobToGCSOperator
-# from airflow.providers.google.cloud.transfers. import 
 
 
 # General constants
@@ -34,13 +33,16 @@ PROJECT_ID = "wizeline-deb-capstone"
 CLUSTER_NAME = "wizeline-deb-dataproc"
 pyspark_file_urls = Variable.get("capstone_pyspark_files_urls_public", deserialize_json=True)
 
-# URIs
+# URIs examples
 # Local files = "file:///usr/lib/spark/examples/jars/spark-examples.jar"
 # GCS files = f"gs://{BUCKET_NAME}/{INIT_FILE}"
 MOVIE_PYSPARK_FILE_URI = f"gs://{GCS_BUCKET_NAME}/SPARK_JOB/movie_review_positive_sentiment.py"
 LOG_PYSPARK_FILE_URI = f"gs://{GCS_BUCKET_NAME}/SPARK_JOB/log_review_processing.py"
 REGION = "us-central1"
-# ZONE = "us-central1-b"
+
+# Postgres constants
+POSTGRES_CONN_ID = "capstone_postgres"
+POSTGRES_TABLE_NAME = "user_purchase"
 
 # Configs
 CLUSTER_CONFIG = {
@@ -54,27 +56,7 @@ CLUSTER_CONFIG = {
         "machine_type_uri": "n2-standard-2",
         "disk_config": {"boot_disk_type": "pd-standard", "boot_disk_size_gb": 32},
     },
-    # "secondary_worker_config": {
-    #     "num_instances": 1,
-    #     "machine_type_uri": "n1-standard-4",
-    #     "disk_config": {
-    #         "boot_disk_type": "pd-standard",
-    #         "boot_disk_size_gb": 32,
-    #     },
-    #     "is_preemptible": True,
-    #     "preemptibility": "PREEMPTIBLE",
-    # },
 }
-
-# # Configuration for a PySpark Job:
-# MOVIE_PYSPARK_JOB = {
-#     "reference": {"project_id": PROJECT_ID},
-#     "placement": {"cluster_name": CLUSTER_NAME},
-#     "pysparkJob": {
-#         "main_python_file_uri": MOVIE_PYSPARK_FILE_URI,
-#         "python_file_uris": [MOVIE_PYSPARK_FILE_URI],
-#         },
-# }
 
 MOVIE_PYSPARK_JOB = {
     "reference": {
@@ -95,24 +77,6 @@ LOG_PYSPARK_JOB = {
         "main_python_file_uri": LOG_PYSPARK_FILE_URI,
         "python_file_uris": [LOG_PYSPARK_FILE_URI],
         },
-}
-
-# Spark Job Template - would replace the job parameter in the above pyspark job configs if you require more config
-spark_job = {
-    "mainPythonFileUri": "gs://your-bucket/your-main.py",  # HCFS URI of the main Python file
-    "args": ["arg1", "arg2"],  # Optional arguments to pass to the driver
-    "pythonFileUris": ["gs://your-bucket/your-python-file.py"],  # Optional Python file URIs
-    "jarFileUris": ["gs://your-bucket/your-jar-file.jar"],  # Optional jar file URIs
-    "fileUris": ["gs://your-bucket/your-file.txt"],  # Optional file URIs
-    "archiveUris": ["gs://your-bucket/your-archive.zip"],  # Optional archive URIs
-    "properties": {
-        "spark.some.property": "value",  # Optional Spark properties
-        # Add any additional Spark properties here
-    },
-    "loggingConfig": {
-        # Optional runtime log config
-        # Example: {"driverLogLevels": {"root": "INFO", "org": "DEBUG"}}
-    }
 }
 
 # Get .py files and store them locally in the airflow server
@@ -167,21 +131,6 @@ with DAG(
         gcp_conn_id=GCP_CONN_ID, 
     )
 
-    # checks_start = DummyOperator(task_id="checks_start")
-
-    # check_gcs_uri_task = HttpSensor(
-    #     task_id="check_gcs_uri_task",
-    #     http_conn_id="http_gcs_default",  # Use an HTTP connection ID defined in Airflow
-    #     endpoint=LOG_PYSPARK_FILE_URI
-    # )
-
-    # check_gdrive_uri_task = HttpSensor(
-    #     task_id="check_gdrive_uri_task",
-    #     http_conn_id="http_gdrive_default",  # Use an HTTP connection ID defined in Airflow
-    #     endpoint=pyspark_file_urls['log_review_processing']
-    # )
-
-
     create_cluster = DataprocCreateClusterOperator(
         task_id="create_cluster",
         project_id=PROJECT_ID,
@@ -209,6 +158,15 @@ with DAG(
         gcp_conn_id=GCP_CONN_ID
     )
 
+    extract_user_purchase_data_postgres = PostgresToGoogleCloudStorageOperator(
+        task_id='extract_user_purchase_data_postgres',
+        postgres_conn_id=POSTGRES_CONN_ID, 
+        sql=f'SELECT * FROM {POSTGRES_TABLE_NAME}', 
+        bucket_name=GCS_BUCKET_NAME,  
+        filename='user_purchase.csv', 
+        export_format='CSV',
+    )
+
     delete_cluster = DataprocDeleteClusterOperator(
         task_id="delete_cluster",
         project_id=PROJECT_ID,
@@ -221,7 +179,7 @@ with DAG(
     end_workflow = DummyOperator(task_id="end_workflow", trigger_rule=TriggerRule.ONE_SUCCESS)
 
     start_workflow >> get_files >> [upload_movie_pyspark_to_gcs, upload_log_pyspark_to_gcs] >> create_cluster
-    create_cluster >> [ movie_pyspark_task, log_pyspark_task ] >> delete_cluster
+    create_cluster >> [ movie_pyspark_task, log_pyspark_task, extract_user_purchase_data_postgres ] >> delete_cluster
     delete_cluster >> end_workflow
 
 
