@@ -218,13 +218,14 @@ with DAG(
 
     end_workflow = DummyOperator(task_id="end_workflow")
 
-    (
-        start_workflow
-        # >> get_files
-        >> [upload_movie_pyspark_to_gcs, upload_log_pyspark_to_gcs]
-        >> [check_gcs_uri_task, check_gdrive_uri_task]
-        # >> create_cluster
-        # >> [ movie_pyspark_task, log_pyspark_task ]  
-        # >> delete_cluster
-        >> end_workflow
-    )
+    start_workflow >> [upload_movie_pyspark_to_gcs, upload_log_pyspark_to_gcs] >> [check_gcs_uri_task, check_gdrive_uri_task] >> end_workflow
+    # (
+    #     start_workflow
+    #     # >> get_files
+    #     >> [upload_movie_pyspark_to_gcs, upload_log_pyspark_to_gcs]
+    #     >> [check_gcs_uri_task, check_gdrive_uri_task]
+    #     # >> create_cluster
+    #     # >> [ movie_pyspark_task, log_pyspark_task ]  
+    #     # >> delete_cluster
+    #     >> end_workflow
+    # )
