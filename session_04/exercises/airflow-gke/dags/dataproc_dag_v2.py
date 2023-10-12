@@ -218,11 +218,11 @@ with DAG(
     #     trigger_rule=TriggerRule.ALL_DONE,
     # )
 
-    end_workflow = DummyOperator(task_id="end_workflow")
+    end_workflow = DummyOperator(task_id="end_workflow", trigger_rule=TriggerRule.ONE_SUCCESS)
 
     (
         start_workflow
-        # >> get_files
+        >> get_files
         >> [upload_movie_pyspark_to_gcs, upload_log_pyspark_to_gcs]
         >> checks_start
     )
