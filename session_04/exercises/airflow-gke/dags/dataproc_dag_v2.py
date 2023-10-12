@@ -164,7 +164,7 @@ with DAG(
         gcp_conn_id=GCP_CONN_ID,
         sql=f'SELECT * FROM {POSTGRES_TABLE_NAME}', 
         bucket=GCS_BUCKET_NAME,  
-        filename='user_purchase.csv', 
+        filename='STAGE/user_purchase.csv', 
         export_format='CSV',
     )
 
