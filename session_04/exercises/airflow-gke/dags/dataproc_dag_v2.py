@@ -10,7 +10,7 @@ from airflow.operators.dummy import DummyOperator
 from airflow.operators.python import PythonOperator
 from airflow.providers.http.sensors.http import HttpSensor
 from airflow.providers.google.cloud.transfers.local_to_gcs import LocalFilesystemToGCSOperator
-from airflow.providers.google.cloud.transfers.postgres_to_gcs import PostgresToGoogleCloudStorageOperator
+from airflow.providers.google.cloud.transfers.postgres_to_gcs import PostgresToGCSOperator
 from airflow.providers.google.cloud.operators.dataproc import DataprocCreateClusterOperator, DataprocSubmitJobOperator, DataprocDeleteClusterOperator
 from airflow.utils.trigger_rule import TriggerRule
 from airflow.utils.dates import days_ago
