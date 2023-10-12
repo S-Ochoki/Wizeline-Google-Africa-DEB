@@ -167,66 +167,64 @@ with DAG(
         gcp_conn_id=GCP_CONN_ID, 
     )
 
-    checks_start = DummyOperator(task_id="checks_start")
+    # checks_start = DummyOperator(task_id="checks_start")
 
-    check_gcs_uri_task = HttpSensor(
-        task_id="check_gcs_uri_task",
-        http_conn_id="http_gcs_default",  # Use an HTTP connection ID defined in Airflow
-        endpoint=LOG_PYSPARK_FILE_URI
+    # check_gcs_uri_task = HttpSensor(
+    #     task_id="check_gcs_uri_task",
+    #     http_conn_id="http_gcs_default",  # Use an HTTP connection ID defined in Airflow
+    #     endpoint=LOG_PYSPARK_FILE_URI
+    # )
+
+    # check_gdrive_uri_task = HttpSensor(
+    #     task_id="check_gdrive_uri_task",
+    #     http_conn_id="http_gdrive_default",  # Use an HTTP connection ID defined in Airflow
+    #     endpoint=pyspark_file_urls['log_review_processing']
+    # )
+
+
+    create_cluster = DataprocCreateClusterOperator(
+        task_id="create_cluster",
+        project_id=PROJECT_ID,
+        cluster_config=CLUSTER_CONFIG,
+        region=REGION,
+        cluster_name=CLUSTER_NAME,
+        delete_on_error=True, 
+        use_if_exists=True,
+        gcp_conn_id=GCP_CONN_ID
     )
 
-    check_gdrive_uri_task = HttpSensor(
-        task_id="check_gdrive_uri_task",
-        http_conn_id="http_gdrive_default",  # Use an HTTP connection ID defined in Airflow
-        endpoint=pyspark_file_urls['log_review_processing']
+    movie_pyspark_task = DataprocSubmitJobOperator(
+        task_id="movie_pyspark_task", 
+        job=MOVIE_PYSPARK_JOB, 
+        region=REGION, 
+        project_id=PROJECT_ID,
+        gcp_conn_id=GCP_CONN_ID
     )
 
+    log_pyspark_task = DataprocSubmitJobOperator(
+        task_id="log_pyspark_task", 
+        job=LOG_PYSPARK_JOB, 
+        region=REGION, 
+        project_id=PROJECT_ID,
+        gcp_conn_id=GCP_CONN_ID
+    )
 
-    # create_cluster = DataprocCreateClusterOperator(
-    #     task_id="create_cluster",
-    #     project_id=PROJECT_ID,
-    #     cluster_config=CLUSTER_CONFIG,
-    #     region=REGION,
-    #     cluster_name=CLUSTER_NAME,
-    #     delete_on_error=True, 
-    #     use_if_exists=True,
-    #     gcp_conn_id=GCP_CONN_ID
-    # )
-
-    # movie_pyspark_task = DataprocSubmitJobOperator(
-    #     task_id="movie_pyspark_task", 
-    #     job=MOVIE_PYSPARK_JOB, 
-    #     region=REGION, 
-    #     project_id=PROJECT_ID,
-    #     gcp_conn_id=GCP_CONN_ID
-    # )
-
-    # log_pyspark_task = DataprocSubmitJobOperator(
-    #     task_id="log_pyspark_task", 
-    #     job=LOG_PYSPARK_JOB, 
-    #     region=REGION, 
-    #     project_id=PROJECT_ID,
-    #     gcp_conn_id=GCP_CONN_ID
-    # )
-
-    # delete_cluster = DataprocDeleteClusterOperator(
-    #     task_id="delete_cluster",
-    #     project_id=PROJECT_ID,
-    #     cluster_name=CLUSTER_NAME,
-    #     region=REGION,
-    #     gcp_conn_id=GCP_CONN_ID,      
-    #     trigger_rule=TriggerRule.ALL_DONE,
-    # )
+    delete_cluster = DataprocDeleteClusterOperator(
+        task_id="delete_cluster",
+        project_id=PROJECT_ID,
+        cluster_name=CLUSTER_NAME,
+        region=REGION,
+        gcp_conn_id=GCP_CONN_ID,      
+        trigger_rule=TriggerRule.ALL_DONE,
+    )
 
     end_workflow = DummyOperator(task_id="end_workflow", trigger_rule=TriggerRule.ONE_SUCCESS)
 
-    (
-        start_workflow
-        >> get_files
-        >> [upload_movie_pyspark_to_gcs, upload_log_pyspark_to_gcs]
-        >> checks_start
-    )
-    checks_start >> [check_gcs_uri_task, check_gdrive_uri_task] >> end_workflow
+    start_workflow >> get_files >> [upload_movie_pyspark_to_gcs, upload_log_pyspark_to_gcs] >> create_cluster
+    create_cluster >> [ movie_pyspark_task, log_pyspark_task ] >> delete_cluster
+    delete_cluster >> end_workflow
+
+
     # (
     #     start_workflow
     #     # >> get_files
