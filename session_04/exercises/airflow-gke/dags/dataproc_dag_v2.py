@@ -161,6 +161,7 @@ with DAG(
     extract_user_purchase_data_postgres = PostgresToGCSOperator(
         task_id='extract_user_purchase_data_postgres',
         postgres_conn_id=POSTGRES_CONN_ID, 
+        gcp_conn_id=GCP_CONN_ID,
         sql=f'SELECT * FROM {POSTGRES_TABLE_NAME}', 
         bucket=GCS_BUCKET_NAME,  
         filename='user_purchase.csv', 
