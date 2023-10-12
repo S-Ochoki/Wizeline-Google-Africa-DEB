@@ -142,7 +142,7 @@ with DAG(
     start_workflow = DummyOperator(task_id="start_workflow")
 
     get_files = PythonOperator(
-        task_id="get_pyspark_files",
+        task_id="get_files",
         python_callable=get_pyspark_files,
         op_kwargs={
             "urls": pyspark_file_urls,
