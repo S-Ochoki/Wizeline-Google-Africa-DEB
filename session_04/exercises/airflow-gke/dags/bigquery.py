@@ -6,7 +6,7 @@
 from airflow.models import DAG
 from airflow.operators.dummy import DummyOperator
 from airflow.providers.google.cloud.operators.bigquery import BigQueryCreateEmptyDatasetOperator, BigQueryCreateEmptyTableOperator, BigQueryInsertJobOperator
-from airflow.providers.google.cloud.operators.bigquery import BigQueryOperator
+# from airflow.providers.google.cloud.operators.bigquery import BigQueryOperator
 from airflow.providers.google.cloud.transfers.gcs_to_bigquery import GCSToBigQueryOperator
 from airflow.utils.dates import days_ago
 from airflow.utils.trigger_rule import TriggerRule
