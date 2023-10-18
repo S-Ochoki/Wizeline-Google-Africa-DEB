@@ -53,10 +53,10 @@ table_schemas = {
         {'name': 'id_dim_os', 'type': 'INTEGER'},
         {'name': 'os', 'type': 'STRING'},
     ],
-    'dim_browser': [
-        {'name': 'id_dim_browser', 'type': 'INTEGER'},
-        {'name': 'browser', 'type': 'STRING'},
-    ],
+    # 'dim_browser': [
+    #     {'name': 'id_dim_browser', 'type': 'INTEGER'},
+    #     {'name': 'browser', 'type': 'STRING'},
+    # ],
     'fact_movie_analytics': [
         {'name': 'customerid', 'type': 'INTEGER'}, # user_purchase.CustomerID
         {'name': 'id_dim_devices', 'type': 'INTEGER'}, # dim_devices.id_dim_devices
