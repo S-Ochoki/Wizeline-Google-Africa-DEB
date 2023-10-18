@@ -5,6 +5,7 @@
 
 from airflow.models import DAG
 from airflow.operators.dummy import DummyOperator
+from airflow.operators.python import BitShift
 from airflow.providers.google.cloud.operators.bigquery import BigQueryCreateEmptyDatasetOperator, BigQueryCreateEmptyTableOperator, BigQueryInsertJobOperator
 # from airflow.providers.google.cloud.operators.bigquery import BigQueryOperator
 from airflow.providers.google.cloud.transfers.gcs_to_bigquery import GCSToBigQueryOperator
@@ -179,6 +180,7 @@ with DAG(
         location='US'
     )
 
+    upload_gcs_data_tasks = []
     for table_name, gcs_csv_file in gcs_csv_files.items():
         task_id = f'upload_{table_name}_csv'  # Unique task ID for each file
         table_id = f'{table_name}'  # Unique target table name
@@ -195,6 +197,9 @@ with DAG(
             field_delimiter=',',  # Modify this if your CSV files use a different delimiter
             gcp_conn_id=GCP_CONN_ID
         ) 
+        upload_gcs_data_tasks.append(upload_gcs_data)
+
+    parallel_upload_gcs_data = BitShift(task_id="parallel_upload_gcs_data", tasks=upload_gcs_data_tasks)
         
     gcs_data_uploaded = DummyOperator(task_id="gcs_data_uploaded", trigger_rule=TriggerRule.ALL_SUCCESS)
     
@@ -245,4 +250,4 @@ with DAG(
 
     end_workflow = DummyOperator(task_id="end_workflow", trigger_rule=TriggerRule.ONE_SUCCESS)
 
-    start_workflow >> create_dataset >> [upload_gcs_data] >> gcs_data_uploaded >> [create_bq_tables] >> bq_tables_created >> [insert_dim_data] >> dim_tables_populated >> insert_fact_data >> end_workflow
+    start_workflow >> create_dataset >> parallel_upload_gcs_data >> gcs_data_uploaded >> [create_bq_tables] >> bq_tables_created >> [insert_dim_data] >> dim_tables_populated >> insert_fact_data >> end_workflow
