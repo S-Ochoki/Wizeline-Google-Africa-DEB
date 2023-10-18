@@ -194,8 +194,10 @@ with DAG(
             skip_leading_rows=1,
             field_delimiter=',',  # Modify this if your CSV files use a different delimiter
             gcp_conn_id=GCP_CONN_ID
-        )    
-
+        ) 
+        
+    gcs_data_uploaded = DummyOperator(task_id="gcs_data_uploaded", trigger_rule=TriggerRule.ALL_SUCCESS)
+    
     for table_id, columns in table_schemas.items():
         create_bq_tables = BigQueryCreateEmptyTableOperator(
             task_id=f'create_{table_id}_table',
@@ -206,7 +208,8 @@ with DAG(
             project_id=GCP_PROJECT_ID,      
             location='US',
         )
-
+        
+    bq_tables_created = DummyOperator(task_id="bq_tables_created", trigger_rule=TriggerRule.ALL_SUCCESS)
 
     # Create a BigQueryInsertJobOperator to execute the insert query
     for table_id, insert_query in table_insert_queries.items():
@@ -223,6 +226,8 @@ with DAG(
                 location='US',  # Set the appropriate location
                 gcp_conn_id=GCP_CONN_ID,
             )
+
+    dim_tables_populated = DummyOperator(task_id="dim_tables_populated", trigger_rule=TriggerRule.ALL_SUCCESS)
     
     insert_fact_data = BigQueryInsertJobOperator(
         task_id=f'insert_fact_data',
@@ -240,4 +245,4 @@ with DAG(
 
     end_workflow = DummyOperator(task_id="end_workflow", trigger_rule=TriggerRule.ONE_SUCCESS)
 
-    start_workflow >> create_dataset >> [upload_gcs_data] >> [create_bq_tables] >> [insert_dim_data] >> insert_fact_data >> end_workflow
+    start_workflow >> create_dataset >> [upload_gcs_data] >> gcs_data_uploaded >> [create_bq_tables] >> bq_tables_created >> [insert_dim_data] >> dim_tables_populated >> insert_fact_data >> end_workflow
