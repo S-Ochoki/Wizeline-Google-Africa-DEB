@@ -200,7 +200,7 @@ with DAG(
         create_bq_tables = BigQueryCreateEmptyTableOperator(
             task_id=f'create_{table_id}_table',
             table_id=f'{table_id}',
-            schema=columns,
+            schema_fields=columns,
             gcp_conn_id=GCP_CONN_ID,
             dataset_id=DATASET_NAME,
             project_id=GCP_PROJECT_ID,      
