@@ -240,4 +240,4 @@ with DAG(
 
     end_workflow = DummyOperator(task_id="end_workflow", trigger_rule=TriggerRule.ONE_SUCCESS)
 
-    start_workflow >> create_dataset >> upload_gcs_data >> create_bq_tables >> insert_dim_data >> insert_fact_data >> end_workflow
+    start_workflow >> create_dataset >> [upload_gcs_data] >> [create_bq_tables] >> [insert_dim_data] >> insert_fact_data >> end_workflow
