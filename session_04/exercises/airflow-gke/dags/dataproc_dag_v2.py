@@ -117,7 +117,7 @@ with DAG(
     
     upload_movie_pyspark_to_gcs = LocalFilesystemToGCSOperator(
         task_id="upload_movie_pyspark_to_gcs",
-        src=f"{LOCAL_DATA_PATH}movie_review_positive_sentiment.py",  
+        src=f"{LOCAL_DATA_PATH}movie_reviews.py",  
         dst="SPARK_JOB/movie_review_positive_sentiment.py", 
         bucket=GCS_BUCKET_NAME,
         gcp_conn_id=GCP_CONN_ID, 
@@ -125,7 +125,7 @@ with DAG(
 
     upload_log_pyspark_to_gcs = LocalFilesystemToGCSOperator(
         task_id="upload_log_pyspark_to_gcs",
-        src=f"{LOCAL_DATA_PATH}log_review_processing.py",  
+        src=f"{LOCAL_DATA_PATH}log_reviews.py",  
         dst="SPARK_JOB/log_review_processing.py", 
         bucket=GCS_BUCKET_NAME,
         gcp_conn_id=GCP_CONN_ID, 
