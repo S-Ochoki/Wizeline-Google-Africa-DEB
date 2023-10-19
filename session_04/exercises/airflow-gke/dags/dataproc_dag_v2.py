@@ -9,10 +9,8 @@ import gdown
 from airflow.models import DAG, Variable
 from airflow.operators.dummy import DummyOperator
 from airflow.operators.python import PythonOperator
-# from airflow.contrib.operators.gcs_list_operator import GoogleCloudStorageListOperator
 from airflow.providers.google.cloud.operators.gcs import GCSListObjectsOperator
 from airflow.providers.google.cloud.transfers.gcs_to_gcs import GCSToGCSOperator
-from datetime import datetime
 from airflow.providers.google.cloud.transfers.local_to_gcs import LocalFilesystemToGCSOperator
 from airflow.providers.google.cloud.transfers.postgres_to_gcs import PostgresToGCSOperator
 from airflow.providers.google.cloud.operators.dataproc import DataprocCreateClusterOperator, DataprocSubmitJobOperator, DataprocDeleteClusterOperator
@@ -101,39 +99,6 @@ def get_pyspark_files(urls=pyspark_file_urls, path=LOCAL_DATA_PATH) -> None:
         print(f"Downloaded {local_file_name} to {local_file_path}")
 
 
-def combine_gcs_files(GCS_BUCKET=GCS_BUCKET_NAME, GCS_PREFIX = None, OUTPUT_PATH = None):
-    from google.cloud import storage
-    # Create a GCS client using the specified connection ID
-    client = storage.Client(project=GCP_CONN_ID.split('.')[0])
-
-    # Get the GCS bucket and blob (output file)
-    bucket = client.get_bucket(GCS_BUCKET)
-    blob = bucket.blob(OUTPUT_PATH)
-
-    # List all the GCS objects in the specified folder prefix
-    objects = list(bucket.list_blobs(prefix=GCS_PREFIX))
-
-    # Initialize a flag to track whether the header has been written
-    header_written = False
-
-    # Combine the content of the part files into a single output file with a single header
-    combined_content = b''
-    for obj in objects:
-        part_content = obj.download_as_text()
-
-        # If the header has not been written yet, write it
-        if not header_written:
-            combined_content += part_content.split('\n', 1)[0] + '\n'  # Extract the first line (header)
-            header_written = True
-
-        # Append the rest of the content
-        combined_content += part_content.split('\n', 1)[1]
-
-    # Upload the combined content to the output file in GCS
-    blob.upload_from_string(combined_content)
-
-    return OUTPUT_PATH
-
 
 with DAG(
     dag_id=DAG_ID,
@@ -216,17 +181,6 @@ with DAG(
         trigger_rule=TriggerRule.ALL_DONE,
     )
 
-    # for key, value in part_files.items():
-    #     combines_part_files = PythonOperator(
-    #         task_id="combines_part_files",
-    #         python_callable=get_pyspark_files,
-    #         op_kwargs={
-    #             "GCS_PREFIX": f'STAGE/{key}',
-    #             "OUTPUT_PATH": LOCAL_DATA_PATH,
-    #         },
-    #         trigger_rule=TriggerRule.ONE_SUCCESS,
-    #     )
-
     # Use the GoogleCloudStorageListOperator to list files with a specific prefix
     list_movie_files = GCSListObjectsOperator(
         task_id='list_movie_files',
@@ -247,6 +201,25 @@ with DAG(
         gcp_conn_id=GCP_CONN_ID,
     )
 
+    list_log_files = GCSListObjectsOperator(
+        task_id='list_log_files',
+        bucket=GCS_BUCKET_NAME,
+        prefix='STAGE/log_reviews_transformed.csv/part-',  # Prefix to match files
+        delimiter='.csv',
+        gcp_conn_id=GCP_CONN_ID,  # Your GCP connection ID
+    )
+
+    # Use the GoogleCloudStorageToGoogleCloudStorageOperator to move and rename the file
+    rename_log_csv = GCSToGCSOperator(
+        task_id='rename_movie_csv',
+        source_bucket=GCS_BUCKET_NAME,
+        source_object="{{ task_instance.xcom_pull(task_ids='list_movie_files')[0] }}",  # Get the first file from the list
+        destination_bucket=GCS_BUCKET_NAME,
+        destination_object='STAGE/log_reviews_transformed.csv',
+        replace=True,
+        gcp_conn_id=GCP_CONN_ID,
+    )
+
     end_workflow = DummyOperator(task_id="end_workflow", trigger_rule=TriggerRule.ONE_SUCCESS)
 
     start_workflow >> get_files >> [upload_movie_pyspark_to_gcs, upload_log_pyspark_to_gcs] >> create_cluster
@@ -254,13 +227,3 @@ with DAG(
     delete_cluster >> list_movie_files >> rename_movie_csv >> end_workflow
 
 
-    # (
-    #     start_workflow
-    #     # >> get_files
-    #     >> [upload_movie_pyspark_to_gcs, upload_log_pyspark_to_gcs]
-    #     >> [check_gcs_uri_task, check_gdrive_uri_task]
-    #     # >> create_cluster
-    #     # >> [ movie_pyspark_task, log_pyspark_task ]  
-    #     # >> delete_cluster
-    #     >> end_workflow
-    # )
