@@ -64,9 +64,9 @@ table_schemas = {
         {'name': 'id_dim_devices', 'type': 'INTEGER'}, # dim_devices.id_dim_devices
         {'name': 'id_dim_location', 'type': 'INTEGER'}, # dim_location.id_dim_location
         {'name': 'id_dim_os', 'type': 'INTEGER'}, # dim_os.id_dim_os
-        {'name': 'amount_spent', 'type': 'NUMERIC', 'mode': 'NULLABLE', 'precision': 18, 'scale': 5}, # SUM(user_purchase.quantity * user_purchase.unit_price) group by user_purchase.CustomerID
-        {'name': 'review_score', 'type': 'INTEGER'}, # SUM(movie_reviews.positive_review) group by user_purchase.CustomerID
-        {'name': 'review_count', 'type': 'INTEGER'}, # COUNT(movie_reviews.review_id) group by user_purchase.CustomerID
+        {'name': 'amount_spent', 'type': 'NUMERIC', 'mode': 'NULLABLE', 'precision': 18, 'scale': 5}, # SUM(user_purchase.quantity * user_purchase.unit_price) group by user_purchase.customer_id
+        {'name': 'review_score', 'type': 'INTEGER'}, # SUM(movie_reviews.positive_review) group by user_purchase.customer_id
+        {'name': 'review_count', 'type': 'INTEGER'}, # COUNT(movie_reviews.review_id) group by user_purchase.customer_id
         {'name': 'insert_date', 'type': 'DATE'}
     ],
 }
@@ -159,8 +159,8 @@ table_insert_queries = {
                 mr.review_count,
                 CURRENT_DATE() AS insert_date
             FROM up
-            INNER JOIN mr ON up.CustomerID = mr.user_id
-            INNER JOIN {GCP_PROJECT_ID}.{DATASET_NAME}.classified_movie_reviews mr2 ON up.CustomerID = mr2.user_id
+            INNER JOIN mr ON up.customer_id = mr.user_id
+            INNER JOIN {GCP_PROJECT_ID}.{DATASET_NAME}.classified_movie_reviews mr2 ON up.customer_id = mr2.user_id
             INNER JOIN {GCP_PROJECT_ID}.{DATASET_NAME}.log_reviews_transformed lr ON mr2.review_id = lr.id_review
         """,
 }
