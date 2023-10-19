@@ -118,6 +118,7 @@ with DAG(
     # )
 
     upload_movie_reviews_to_gcs = GoogleDriveToGCSOperator (
+        task_id="upload_movie_reviews_to_gcs",
         bucket_name=GCS_BUCKET_NAME,
         object_name=GCS_MOVIE_FILE_PATH,
         file_name="movie_reviews.csv",
