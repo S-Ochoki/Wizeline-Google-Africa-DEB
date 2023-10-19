@@ -144,9 +144,9 @@ table_insert_queries = {
                     GROUP BY user_id
                 ),
                 up AS (
-                    SELECT CustomerID, SUM(Quantity * UnitPrice) amount_spent
+                    SELECT customer_id, SUM(Quantity * UnitPrice) amount_spent
                     FROM `{GCP_PROJECT_ID}.{DATASET_NAME}.user_purchase` 
-                    GROUP BY CustomerID
+                    GROUP BY customer_id
                 )
             SELECT 
                 up.CustomerID AS customerid,
