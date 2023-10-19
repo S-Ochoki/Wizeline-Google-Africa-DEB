@@ -17,6 +17,7 @@ from airflow.operators.sql import BranchSQLOperator
 from airflow.providers.google.cloud.hooks.gcs import GCSHook
 from airflow.providers.google.cloud.sensors.gcs import GCSObjectExistenceSensor
 from airflow.contrib.sensors.gcs_sensor import GoogleCloudStorageObjectSensor
+from airflow.providers.google.cloud.transfers.gdrive_to_gcs import GoogleDriveToGCSOperator 
 
 from airflow.providers.google.cloud.transfers.local_to_gcs import LocalFilesystemToGCSOperator
 from airflow.providers.postgres.hooks.postgres import PostgresHook
@@ -41,6 +42,9 @@ GCS_MOVIE_FILE_PATH = 'RAW/movie_reviews.csv'
 # Postgres constants
 POSTGRES_CONN_ID = "capstone_postgres"
 POSTGRES_TABLE_NAME = "user_purchase"
+
+# GDRIVE
+GDRIVE_DATA_FOLDER = "1Ob14UnJL4EIoZQQlLxUFj5nUkJ4cegFA"
 
 file_urls = Variable.get("capstone_files_urls_public", deserialize_json=True)
 
@@ -105,12 +109,20 @@ with DAG(
         trigger_rule=TriggerRule.ONE_SUCCESS,
     )
 
-    upload_movie_reviews_to_gcs = LocalFilesystemToGCSOperator(
-        task_id="upload_movie_reviews_to_gcs",
-        src=f"{LOCAL_DATA_PATH}movie_reviews.csv",  
-        dst="RAW/movie_reviews.csv", 
-        bucket=GCS_BUCKET_NAME,
-        gcp_conn_id=GCP_CONN_ID, 
+    # upload_movie_reviews_to_gcs = LocalFilesystemToGCSOperator(
+    #     task_id="upload_movie_reviews_to_gcs",
+    #     src=f"{LOCAL_DATA_PATH}movie_reviews.csv",  
+    #     dst="RAW/movie_reviews.csv", 
+    #     bucket=GCS_BUCKET_NAME,
+    #     gcp_conn_id=GCP_CONN_ID, 
+    # )
+
+    upload_movie_reviews_to_gcs = GoogleDriveToGCSOperator (
+        bucket_name=GCS_BUCKET_NAME,
+        object_name=GCS_MOVIE_FILE_PATH,
+        file_name="movie_reviews.csv",
+        folder_id=GDRIVE_DATA_FOLDER,
+        gcp_conn_id=GCP_CONN_ID,
     )
 
     upload_log_reviews_to_gcs = LocalFilesystemToGCSOperator(
