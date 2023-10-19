@@ -44,7 +44,7 @@ POSTGRES_CONN_ID = "capstone_postgres"
 POSTGRES_TABLE_NAME = "user_purchase"
 
 # GDRIVE
-GDRIVE_DATA_FOLDER = "1Ob14UnJL4EIoZQQlLxUFj5nUkJ4cegFA"
+GDRIVE_DATA_FOLDER = "1Ob14UnJL4EIoZQQlLxUFj5nUkJ4cegFA" # "1H0-oGRRtlcDWmIsreeV5c8pxwuFXeXtj"
 
 file_urls = Variable.get("capstone_files_urls_public", deserialize_json=True)
 
@@ -126,13 +126,22 @@ with DAG(
         gcp_conn_id=GCP_CONN_ID,
     )
 
-    upload_log_reviews_to_gcs = LocalFilesystemToGCSOperator(
+    upload_log_reviews_to_gcs = GoogleDriveToGCSOperator (
         task_id="upload_log_reviews_to_gcs",
-        src=f"{LOCAL_DATA_PATH}log_reviews.csv",  
-        dst="RAW/log_reviews.csv", 
-        bucket=GCS_BUCKET_NAME,
-        gcp_conn_id=GCP_CONN_ID, 
+        bucket_name=GCS_BUCKET_NAME,
+        object_name=GCS_LOG_FILE_PATH,
+        file_name="log_reviews.csv",
+        folder_id=GDRIVE_DATA_FOLDER,
+        gcp_conn_id=GCP_CONN_ID,
     )
+    
+    # upload_log_reviews_to_gcs = LocalFilesystemToGCSOperator(
+    #     task_id="upload_log_reviews_to_gcs",
+    #     src=f"{LOCAL_DATA_PATH}log_reviews.csv",  
+    #     dst="RAW/log_reviews.csv", 
+    #     bucket=GCS_BUCKET_NAME,
+    #     gcp_conn_id=GCP_CONN_ID, 
+    # )
 
     create_user_purchase_table = PostgresOperator(
         task_id="create_user_purchase_table",
