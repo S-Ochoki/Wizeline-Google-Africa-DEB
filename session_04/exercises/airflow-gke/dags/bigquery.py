@@ -176,8 +176,11 @@ with DAG(
 
     create_dataset = BigQueryCreateEmptyDatasetOperator(
         task_id="create_dataset", 
+        project_id=GCP_PROJECT_ID,
+        gcp_conn_id=GCP_CONN_ID,
         dataset_id=DATASET_NAME,
-        location='US'
+        location='US',
+        if_exists="ignore"
     )
 
     upload_gcs_data_tasks = []
