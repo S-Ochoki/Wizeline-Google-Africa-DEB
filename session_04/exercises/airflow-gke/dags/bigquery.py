@@ -195,8 +195,8 @@ with DAG(
             destination_project_dataset_table=f'{GCP_PROJECT_ID}.{DATASET_NAME}.{table_id}',
             source_format = "CSV",
             external_table = False,
-            create_disposition = "CREATE_IF_NEEDED",  # You can change this depending on your requirements
-            write_disposition='WRITE_EMPTY',
+            # create_disposition = "CREATE_IF_NEEDED",  # You can change this depending on your requirements
+            write_disposition='WRITE_TRUNCATE',
             skip_leading_rows=1,
             field_delimiter=',',  # Modify this if your CSV files use a different delimiter
             gcp_conn_id=GCP_CONN_ID
