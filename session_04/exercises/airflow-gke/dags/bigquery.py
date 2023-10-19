@@ -60,6 +60,7 @@ table_schemas = {
     # ],
     'fact_movie_analytics': [
         {'name': 'customerid', 'type': 'INTEGER'}, # user_purchase.CustomerID
+        {'name': 'id_dim_date', 'type': 'INTEGER'},
         {'name': 'id_dim_devices', 'type': 'INTEGER'}, # dim_devices.id_dim_devices
         {'name': 'id_dim_location', 'type': 'INTEGER'}, # dim_location.id_dim_location
         {'name': 'id_dim_os', 'type': 'INTEGER'}, # dim_os.id_dim_os
