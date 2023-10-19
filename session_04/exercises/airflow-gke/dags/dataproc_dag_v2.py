@@ -211,7 +211,7 @@ with DAG(
 
     # Use the GoogleCloudStorageToGoogleCloudStorageOperator to move and rename the file
     rename_log_csv = GCSToGCSOperator(
-        task_id='rename_movie_csv',
+        task_id='rename_log_csv',
         source_bucket=GCS_BUCKET_NAME,
         source_object="{{ task_instance.xcom_pull(task_ids='list_movie_files')[0] }}",  # Get the first file from the list
         destination_bucket=GCS_BUCKET_NAME,
