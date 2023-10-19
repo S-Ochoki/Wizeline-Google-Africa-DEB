@@ -109,39 +109,39 @@ with DAG(
         trigger_rule=TriggerRule.ONE_SUCCESS,
     )
 
-    # upload_movie_reviews_to_gcs = LocalFilesystemToGCSOperator(
-    #     task_id="upload_movie_reviews_to_gcs",
-    #     src=f"{LOCAL_DATA_PATH}movie_reviews.csv",  
-    #     dst="RAW/movie_reviews.csv", 
-    #     bucket=GCS_BUCKET_NAME,
-    #     gcp_conn_id=GCP_CONN_ID, 
-    # )
-
-    upload_movie_reviews_to_gcs = GoogleDriveToGCSOperator (
+    upload_movie_reviews_to_gcs = LocalFilesystemToGCSOperator(
         task_id="upload_movie_reviews_to_gcs",
-        bucket_name=GCS_BUCKET_NAME,
-        object_name=GCS_MOVIE_FILE_PATH,
-        file_name="movie_reviews.csv",
-        folder_id=GDRIVE_DATA_FOLDER,
-        gcp_conn_id=GCP_CONN_ID,
+        src=f"{LOCAL_DATA_PATH}movie_reviews.csv",  
+        dst="RAW/movie_reviews.csv", 
+        bucket=GCS_BUCKET_NAME,
+        gcp_conn_id=GCP_CONN_ID, 
     )
 
-    upload_log_reviews_to_gcs = GoogleDriveToGCSOperator (
-        task_id="upload_log_reviews_to_gcs",
-        bucket_name=GCS_BUCKET_NAME,
-        object_name=GCS_LOG_FILE_PATH,
-        file_name="log_reviews.csv",
-        folder_id=GDRIVE_DATA_FOLDER,
-        gcp_conn_id=GCP_CONN_ID,
-    )
-    
-    # upload_log_reviews_to_gcs = LocalFilesystemToGCSOperator(
-    #     task_id="upload_log_reviews_to_gcs",
-    #     src=f"{LOCAL_DATA_PATH}log_reviews.csv",  
-    #     dst="RAW/log_reviews.csv", 
-    #     bucket=GCS_BUCKET_NAME,
-    #     gcp_conn_id=GCP_CONN_ID, 
+    # upload_movie_reviews_to_gcs = GoogleDriveToGCSOperator (
+    #     task_id="upload_movie_reviews_to_gcs",
+    #     bucket_name=GCS_BUCKET_NAME,
+    #     object_name=GCS_MOVIE_FILE_PATH,
+    #     file_name="movie_reviews.csv",
+    #     folder_id=GDRIVE_DATA_FOLDER,
+    #     gcp_conn_id=GCP_CONN_ID,
     # )
+
+    # upload_log_reviews_to_gcs = GoogleDriveToGCSOperator (
+    #     task_id="upload_log_reviews_to_gcs",
+    #     bucket_name=GCS_BUCKET_NAME,
+    #     object_name=GCS_LOG_FILE_PATH,
+    #     file_name="log_reviews.csv",
+    #     folder_id=GDRIVE_DATA_FOLDER,
+    #     gcp_conn_id=GCP_CONN_ID,
+    # )
+    
+    upload_log_reviews_to_gcs = LocalFilesystemToGCSOperator(
+        task_id="upload_log_reviews_to_gcs",
+        src=f"{LOCAL_DATA_PATH}log_reviews.csv",  
+        dst="RAW/log_reviews.csv", 
+        bucket=GCS_BUCKET_NAME,
+        gcp_conn_id=GCP_CONN_ID, 
+    )
 
     create_user_purchase_table = PostgresOperator(
         task_id="create_user_purchase_table",
