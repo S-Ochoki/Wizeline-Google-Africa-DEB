@@ -213,7 +213,7 @@ with DAG(
     rename_log_csv = GCSToGCSOperator(
         task_id='rename_log_csv',
         source_bucket=GCS_BUCKET_NAME,
-        source_object="{{ task_instance.xcom_pull(task_ids='list_movie_files')[0] }}",  # Get the first file from the list
+        source_object="{{ task_instance.xcom_pull(task_ids='list_log_files')[0] }}",  # Get the first file from the list
         destination_bucket=GCS_BUCKET_NAME,
         destination_object='STAGE/log_reviews_transformed.csv',
         replace=True,
