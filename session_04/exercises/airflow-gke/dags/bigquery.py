@@ -76,19 +76,19 @@ table_insert_queries = {
             INSERT INTO `{DATASET_NAME}.dim_date` (id_dim_date, log_date, day, month, year, season)
             SELECT
                 ROW_NUMBER() OVER () AS id_dim_date,
-                logDate AS log_date,
-                FORMAT_DATE('%d', logDate) AS day,
-                FORMAT_DATE('%b', logDate) AS month,
-                FORMAT_DATE('%Y', logDate) AS year,
+                log_date,
+                FORMAT_DATE('%d', log_date) AS day,
+                FORMAT_DATE('%b', log_date) AS month,
+                FORMAT_DATE('%Y', log_date) AS year,
                 CASE
-                    WHEN EXTRACT(MONTH FROM logDate) IN (12, 1, 2) THEN 'Winter'
-                    WHEN EXTRACT(MONTH FROM logDate) IN (3, 4, 5) THEN 'Spring'
-                    WHEN EXTRACT(MONTH FROM logDate) IN (6, 7, 8) THEN 'Summer'
+                    WHEN EXTRACT(MONTH FROM log_date) IN (12, 1, 2) THEN 'Winter'
+                    WHEN EXTRACT(MONTH FROM log_date) IN (3, 4, 5) THEN 'Spring'
+                    WHEN EXTRACT(MONTH FROM log_date) IN (6, 7, 8) THEN 'Summer'
                     ELSE 'Fall'
                 END AS season
             FROM (
-                SELECT DISTINCT logDate FROM `{DATASET_NAME}.log_reviews_transformed`
-                ORDER BY logDate
+                SELECT DISTINCT log_date FROM `{DATASET_NAME}.log_reviews_transformed`
+                ORDER BY log_date
             ) unique_dates
         """,
     'dim_devices': f"""
