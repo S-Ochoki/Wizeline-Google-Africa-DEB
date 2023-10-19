@@ -224,6 +224,9 @@ with DAG(
 
     start_workflow >> get_files >> [upload_movie_pyspark_to_gcs, upload_log_pyspark_to_gcs] >> create_cluster
     create_cluster >> [ movie_pyspark_task, log_pyspark_task, extract_user_purchase_data_postgres ] >> delete_cluster
-    delete_cluster >> list_movie_files >> rename_movie_csv >> end_workflow
+    delete_cluster >> [list_movie_files, list_log_files] 
+    list_movie_files >> rename_movie_csv 
+    list_log_files >> rename_log_csv
+    [rename_movie_csv, rename_log_csv] >> end_workflow
 
 
