@@ -161,7 +161,7 @@ table_insert_queries = {
             FROM up
             INNER JOIN mr ON up.customer_id = mr.user_id
             INNER JOIN {GCP_PROJECT_ID}.{DATASET_NAME}.classified_movie_reviews mr2 ON up.customer_id = mr2.user_id
-            INNER JOIN {GCP_PROJECT_ID}.{DATASET_NAME}.log_reviews_transformed lr ON mr2.review_id = lr.id_review
+            INNER JOIN {GCP_PROJECT_ID}.{DATASET_NAME}.log_reviews_transformed lr ON mr2.review_id = lr.log_id
         """,
 }
 
