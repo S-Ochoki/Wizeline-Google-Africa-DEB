@@ -36,9 +36,7 @@ GCS_MOVIE_FILE_PATH = 'RAW/movie_reviews.csv'
 PROJECT_ID = "wizeline-deb-capstone"
 CLUSTER_NAME = "wizeline-deb-dataproc"
 pyspark_file_urls = Variable.get("capstone_pyspark_files_urls_public", deserialize_json=True)
-# part_files = {
-#     'classified_movie_reviews.csv': 
-# }
+
 
 # URIs examples
 # Local files = "file:///usr/lib/spark/examples/jars/spark-examples.jar"
@@ -51,7 +49,7 @@ REGION = "us-central1"
 POSTGRES_CONN_ID = "capstone_postgres"
 POSTGRES_TABLE_NAME = "user_purchase"
 
-# Configs
+# Dataproc Configs
 CLUSTER_CONFIG = {
     "master_config": {
         "num_instances": 1,
@@ -232,10 +230,10 @@ with DAG(
     # Use the GoogleCloudStorageListOperator to list files with a specific prefix
     list_movie_files = GCSListObjectsOperator(
         task_id='list_movie_files',
-        bucket_name=GCS_BUCKET_NAME,
+        bucket=GCS_BUCKET_NAME,
         prefix='STAGE/classified_movie_reviews.csv/part-',  # Prefix to match files
         delimiter='.csv',
-        google_cloud_storage_conn_id=GCP_CONN_ID,  # Your GCP connection ID
+        gcp_conn_id=GCP_CONN_ID,  # Your GCP connection ID
     )
 
     # Use the GoogleCloudStorageToGoogleCloudStorageOperator to move and rename the file
@@ -246,7 +244,7 @@ with DAG(
         destination_bucket=GCS_BUCKET_NAME,
         destination_object='STAGE/classified_movie_reviews.csv',
         replace=True,
-        google_cloud_storage_conn_id=GCP_CONN_ID,
+        gcp_conn_id=GCP_CONN_ID,
     )
 
     end_workflow = DummyOperator(task_id="end_workflow", trigger_rule=TriggerRule.ONE_SUCCESS)
