@@ -522,14 +522,6 @@ with DAG(
 
     stage_ready = DummyOperator(task_id="stage_ready", trigger_rule=TriggerRule.ALL_SUCCESS)
 
-    delete_dataset = BigQueryDeleteDatasetOperator(
-        task_id='delete_dataset',
-        dataset_id=DATASET_NAME,
-        project_id=GCP_PROJECT_ID,
-        delete_contents=True, # Force the deletion of the dataset as well as its tables (if any).
-        gcp_conn_id=GCP_CONN_ID,
-    )
-
     create_dataset = BigQueryCreateEmptyDatasetOperator(
         task_id="create_dataset", 
         project_id=GCP_PROJECT_ID,
@@ -539,6 +531,7 @@ with DAG(
         if_exists="ignore"
     )
 
+    upload_gcs_data_tasks = []
     for table_name, gcs_csv_file in gcs_csv_files.items():
         task_id = f'upload_{table_name}_csv'  # Unique task ID for each file
         table_id = f'{table_name}'  # Unique target table name
@@ -550,15 +543,21 @@ with DAG(
             destination_project_dataset_table=f'{GCP_PROJECT_ID}.{DATASET_NAME}.{table_id}',
             source_format = "CSV",
             external_table = False,
-            create_disposition = "CREATE_IF_NEEDED",  # You can change this depending on your requirements
+            # create_disposition = "CREATE_IF_NEEDED",  # You can change this depending on your requirements
             write_disposition='WRITE_TRUNCATE',
             skip_leading_rows=1,
             field_delimiter=',',  # Modify this if your CSV files use a different delimiter
             gcp_conn_id=GCP_CONN_ID
-        )    
+        ) 
+        upload_gcs_data_tasks.append(upload_gcs_data)
 
+    # parallel_upload_gcs_data = BitShift(task_id="parallel_upload_gcs_data", tasks=upload_gcs_data_tasks)
+        
+    gcs_data_uploaded = DummyOperator(task_id="gcs_data_uploaded", trigger_rule=TriggerRule.ALL_SUCCESS)
+
+    create_bq_table_tasks = []
     for table_id, columns in table_schemas.items():
-        create_bq_tables = BigQueryCreateEmptyTableOperator(
+        create_bq_table = BigQueryCreateEmptyTableOperator(
             task_id=f'create_{table_id}_table',
             table_id=f'{table_id}',
             schema_fields=columns,
@@ -566,11 +565,13 @@ with DAG(
             dataset_id=DATASET_NAME,
             project_id=GCP_PROJECT_ID,      
             location='US',
-            if_exists='ignore',
         )
-
+        create_bq_table_tasks.append(create_bq_table)
+        
+    bq_tables_created = DummyOperator(task_id="bq_tables_created", trigger_rule=TriggerRule.ALL_SUCCESS)
 
     # Create a BigQueryInsertJobOperator to execute the insert query
+    insert_dim_data_tasks=[]
     for table_id, insert_query in table_insert_queries.items():
         if table_id != 'fact_movie_analytics':
             insert_dim_data = BigQueryInsertJobOperator(
@@ -585,6 +586,9 @@ with DAG(
                 location='US',  # Set the appropriate location
                 gcp_conn_id=GCP_CONN_ID,
             )
+            insert_dim_data_tasks.append(insert_dim_data)
+
+    dim_tables_populated = DummyOperator(task_id="dim_tables_populated", trigger_rule=TriggerRule.ALL_SUCCESS)
     
     insert_fact_data = BigQueryInsertJobOperator(
         task_id=f'insert_fact_data',
@@ -625,7 +629,6 @@ with DAG(
 
 
     # Task Flow 3: Data Warehousing
-    # stage_ready >> create_dataset >> upload_gcs_data >> create_bq_tables >> insert_dim_data >> insert_fact_data >> end_workflow
     stage_ready >> create_dataset >> upload_gcs_data_tasks >> gcs_data_uploaded >> create_bq_table_tasks >> bq_tables_created >> insert_dim_data_tasks >> dim_tables_populated >> insert_fact_data >> end_workflow
 
 
