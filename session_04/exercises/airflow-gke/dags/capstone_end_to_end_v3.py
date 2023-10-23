@@ -192,12 +192,12 @@ table_insert_queries = {
                     GROUP BY user_id
                 ),
                 up AS (
-                    SELECT CustomerID, SUM(Quantity * UnitPrice) amount_spent
+                    SELECT customer_id, SUM(quantity * unit_price) amount_spent
                     FROM `{GCP_PROJECT_ID}.{DATASET_NAME}.user_purchase` 
-                    GROUP BY CustomerID
+                    GROUP BY customer_id
                 )
             SELECT 
-                up.CustomerID AS customerid,
+                up.customer_id AS customerid,
                 (SELECT ddt.id_dim_date FROM {GCP_PROJECT_ID}.{DATASET_NAME}.dim_date ddt WHERE ddt.log_date = lr.log_date) id_dim_date,
                 (SELECT dd.id_dim_devices FROM {GCP_PROJECT_ID}.{DATASET_NAME}.dim_devices dd WHERE dd.device = lr.device) id_dim_devices,
                 (SELECT dl.id_dim_location FROM {GCP_PROJECT_ID}.{DATASET_NAME}.dim_location dl WHERE dl.location = lr.location) id_dim_location,
@@ -207,9 +207,9 @@ table_insert_queries = {
                 mr.review_count,
                 CURRENT_DATE() AS insert_date
             FROM up
-            INNER JOIN mr ON up.CustomerID = mr.user_id
-            INNER JOIN {GCP_PROJECT_ID}.{DATASET_NAME}.classified_movie_reviews mr2 ON up.CustomerID = mr2.user_id
-            INNER JOIN {GCP_PROJECT_ID}.{DATASET_NAME}.log_reviews_transformed lr ON mr2.review_id = lr.id_review
+            INNER JOIN mr ON up.customer_id = mr.user_id
+            INNER JOIN {GCP_PROJECT_ID}.{DATASET_NAME}.classified_movie_reviews mr2 ON up.customer_id = mr2.user_id
+            INNER JOIN {GCP_PROJECT_ID}.{DATASET_NAME}.log_reviews_transformed lr ON mr2.review_id = lr.log_id
         """,
 }
 
