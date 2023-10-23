@@ -625,7 +625,8 @@ with DAG(
 
 
     # Task Flow 3: Data Warehousing
-    stage_ready >> create_dataset >> upload_gcs_data >> create_bq_tables >> insert_dim_data >> insert_fact_data >> end_workflow
+    # stage_ready >> create_dataset >> upload_gcs_data >> create_bq_tables >> insert_dim_data >> insert_fact_data >> end_workflow
+    stage_ready >> create_dataset >> upload_gcs_data_tasks >> gcs_data_uploaded >> create_bq_table_tasks >> bq_tables_created >> insert_dim_data_tasks >> dim_tables_populated >> insert_fact_data >> end_workflow
 
 
     dag.doc_md = __doc__
