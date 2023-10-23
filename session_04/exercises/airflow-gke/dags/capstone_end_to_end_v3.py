@@ -108,12 +108,13 @@ table_schemas = {
     ],
     'fact_movie_analytics': [
         {'name': 'customerid', 'type': 'INTEGER'}, # user_purchase.CustomerID
+        {'name': 'id_dim_date', 'type': 'INTEGER'},
         {'name': 'id_dim_devices', 'type': 'INTEGER'}, # dim_devices.id_dim_devices
         {'name': 'id_dim_location', 'type': 'INTEGER'}, # dim_location.id_dim_location
         {'name': 'id_dim_os', 'type': 'INTEGER'}, # dim_os.id_dim_os
-        {'name': 'amount_spent', 'type': 'NUMERIC', 'mode': 'NULLABLE', 'precision': 18, 'scale': 5}, # SUM(user_purchase.quantity * user_purchase.unit_price) group by user_purchase.CustomerID
-        {'name': 'review_score', 'type': 'INTEGER'}, # SUM(movie_reviews.positive_review) group by user_purchase.CustomerID
-        {'name': 'review_count', 'type': 'INTEGER'}, # COUNT(movie_reviews.review_id) group by user_purchase.CustomerID
+        {'name': 'amount_spent', 'type': 'NUMERIC', 'mode': 'NULLABLE', 'precision': 18, 'scale': 5}, # SUM(user_purchase.quantity * user_purchase.unit_price) group by user_purchase.customer_id
+        {'name': 'review_score', 'type': 'INTEGER'}, # SUM(movie_reviews.positive_review) group by user_purchase.customer_id
+        {'name': 'review_count', 'type': 'INTEGER'}, # COUNT(movie_reviews.review_id) group by user_purchase.customer_id
         {'name': 'insert_date', 'type': 'DATE'}
     ],
 }
